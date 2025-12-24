@@ -1,0 +1,61 @@
+Typically machine learning using regression is carried out using large amount of data by splitting the data into training set and test set.  Further, these splitting can be performed many times by selecting the training set and test set randomly.  Study at the regression fitting parameters for each pair of sets to assess the regression model.
+
+A csv file with dependent variable y on the first column and x1,x2 and x3 represent the independent variables.  Split this data to train and test several times and look at the linear regression coefficients.
+
+You can also try different proportions of train and test data.
+
+For splitting the data
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, Y_train, Y_test = train_test_split( X, Y, test_size=0.2)
+
+from sklearn.model_selection import cross_val_score, KFold
+
+For performing several iterations of splitting and fitting the data use
+
+ KFold, and cross_validate
+
+ import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split , KFold , cross_validate
+import numpy as np
+
+df = pd.read_csv('/home/students/24B2461/data2.csv')
+
+Y = df.iloc[:, 0].values
+X = df.iloc[:, 1:4].values
+
+test_sizes = [0.1 , 0.2 , 0.3]
+n_split = 5
+
+for test_size in test_sizes:
+    print(f"\nTest size: {test_size}")
+    coef_list = []
+    for i in range(n_split):
+        X_train , X_test , Y_train , Y_test = train_test_split(X , Y , test_size = test_size , random_state = i )
+        model = LinearRegression()
+        model.fit(X_train , Y_train)
+        coef_list.append(model.coef_)
+        print(f"split {i+1}: coefficient = {model.coef_}")
+    avg_coefs = np.mean(coef_list , axis = 1)
+    print(f"average coefficint for test size {test_size} : {avg_coefs}")
+    
+kf = KFold(n_splits=5 , shuffle=True , random_state=69)
+model = LinearRegression()
+
+print(f" Using KFold and cross_validate")
+
+coefs = []
+
+for train_index , test_index in kf.split(X):
+    X_train , X_test = X[train_index] , X[test_index]
+    Y_train , Y_test = Y[train_index] , Y[test_index]
+    model.fit(X_train , Y_train)
+    coefs.append(model.coef_)
+    print(f"Fold coeff: {model.coef_}")
+    
+means_coef = np.mean(coefs , axis = 0)
+
+print(f"average kfold coeff : {means_coef}")
+        
